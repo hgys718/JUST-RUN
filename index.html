@@ -76,6 +76,12 @@
   #fmtTag{color:#6c6c74;letter-spacing:.08em;white-space:nowrap}
   .kbd{color:#55555c}
 
+  @media (max-width:900px){
+    #panel{top:auto;bottom:56px;left:12px;right:12px;width:auto;max-height:42vh}
+    #stage{padding:16px 16px calc(42vh + 76px) 16px}
+    #transport{left:16px!important;right:16px!important;bottom:14px}
+    #fmtTag,.kbd{display:none}
+  }
   #modal{position:fixed;inset:0;background:rgba(5,3,6,.86);display:none;align-items:center;justify-content:center;z-index:40}
   #modal.on{display:flex}
   #modal .box{width:min(520px,92vw);background:var(--panel);border:1px solid #2b2b31;padding:16px;font-size:11px;line-height:1.6}
@@ -141,7 +147,7 @@ const LAYOUT = {
       copy:"WARMEST SPOT IN\nMY APARTMENT?\nUNDER THE BLANKET.\nWHICH IS EXACTLY\nTHE PROBLEM" },
   v:{ W:1080, H:1920,
       logo:{s:.15, c:[540,1792]}, line:{asset:"vline", s:.25, c:[540,149]},
-      text:{align:"center", x:540, size:150, lead:129, track:-30, cy:960, maxW:1000, maxH:1375},
+      text:{align:"center", x:540, size:150, lead:129, track:-30, cy:960, maxW:1040, maxH:1375},
       burn:"slow",
       sample:"runner",
       copy:"THE CITY'S\nBEEN STEAMING\nSINCE 1882.\nYOUR TURN." },
@@ -181,7 +187,7 @@ function L(){
   const tagTop = fam==="h" ? 50 : 75*k, logoBot = fam==="h" ? 1059 : H-63*k;
   const [t0,t1]=EXT[asset], [l0,l1]=EXT.logo;
   const tagBottom=tagTop+tagS*(t1-t0), logoTop=logoBot-logoS*(l1-l0), pad=25*k;
-  const text = fam==="h" ? {...base.text} : {align:"center", x:540, size:150*k, lead:129*k, track:-30, maxW:1000};
+  const text = fam==="h" ? {...base.text} : {align:"center", x:540, size:150*k, lead:129*k, track:-30, maxW:1040};
   text.cy=H/2; text.availTop=tagBottom+pad; text.availBot=logoTop-pad; text.maxH=Math.max(60,text.availBot-text.availTop);
   return {...base, W, H,
     logo:{s:logoS, c:[W/2, logoBot-logoS*(l1-540)]},
