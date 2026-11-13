@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%23070308%22/%3E%3Ccircle cx=%228%22 cy=%228%22 r=%225%22 fill=%22%23fa2410%22/%3E%3C/svg%3E">
 <title>JUST RUN / JUST RAN — Motion Poster Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,11 +76,54 @@
   #fmtTag{color:#6c6c74;letter-spacing:.08em;white-space:nowrap}
   .kbd{color:#55555c}
 
+  .phead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 4px;letter-spacing:.14em;color:var(--hi);font-size:10px}
+  .phead b{font-weight:600}
+  .phead button{display:none;border:0;background:#2c2c32;color:var(--txt);width:32px;height:32px;border-radius:16px;font:14px var(--mono);cursor:pointer}
+  #editPill{display:none;position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:25;height:42px;padding:0 20px;border:0;border-radius:21px;
+    background:var(--btn);color:#141417;font:600 12px var(--mono);letter-spacing:.12em;box-shadow:0 6px 24px rgba(0,0,0,.55);cursor:pointer}
+  button,select,input{touch-action:manipulation}
+
+  /* camera capture overlay */
+  #cam{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:#000}
+  #cam.on{display:flex}
+  #camVid{flex:1;min-height:0;width:100%;object-fit:cover;background:#000}
+  #camVid.mirror{transform:scaleX(-1)}
+  #camBar{display:flex;gap:14px;align-items:center;justify-content:center;padding:14px 14px calc(16px + env(safe-area-inset-bottom))}
+  #camBar .mini{height:42px;padding:0 18px;font-size:12px;border-radius:21px}
+  #camShut{width:66px;height:66px;border-radius:50%;border:4px solid #0d0d10;outline:3px solid #e9e9ee;background:#e9e9ee;cursor:pointer}
+  #camShut:active{background:#a9a9af}
+  #camErr{position:absolute;top:42%;left:0;right:0;text-align:center;color:#d9a35b;font:12px var(--mono);line-height:1.6;padding:0 24px;display:none}
+
+  /* phones and small tablets: panel becomes a bottom sheet */
   @media (max-width:900px){
-    #panel{top:auto;bottom:56px;left:12px;right:12px;width:auto;max-height:42vh}
-    #stage{padding:16px 16px calc(42vh + 76px) 16px}
-    #transport{left:16px!important;right:16px!important;bottom:14px}
+    #panel{top:auto;bottom:0;left:0;right:0;width:auto;max-height:46vh;border-radius:14px 14px 0 0;border-left:0;border-right:0;border-bottom:0;
+      font-size:12px;padding-bottom:calc(8px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.6)}
+    .phead{padding:12px 14px 8px;font-size:11px}
+    .phead button{display:block}
+    #stage{padding:12px 12px calc(46vh + 62px) 12px}
+    #transport{left:14px;right:14px;bottom:calc(46vh + 12px);height:36px}
+    body.nopanel #stage{padding:12px 12px 74px 12px}
+    body.nopanel #transport{bottom:calc(18px + env(safe-area-inset-bottom));right:150px}
+    body.nopanel #editPill{display:block}
     #fmtTag,.kbd{display:none}
+    #play{width:46px;height:36px;font:15px var(--mono)}
+    .fh{height:36px;padding:0 14px;font-size:11px}
+    .row{min-height:38px;grid-template-columns:104px 1fr;padding:0 12px 0 14px}
+    .row label{font-size:10px}
+    .topbtn{height:40px;font-size:12px;margin:6px;width:calc(100% - 12px);border-radius:6px}
+    .btnrow .topbtn{width:auto}
+    .mini{height:34px;font-size:12px;padding:0 14px;border-radius:5px}
+    .num{width:66px;height:30px;font-size:14px;border-radius:4px}
+    select{height:34px;font-size:14px;border-radius:4px;background-position:calc(100% - 11px) 15px,calc(100% - 6px) 15px}
+    textarea{font-size:16px;min-height:92px;border-radius:4px}
+    .seg button{height:34px;font-size:11px}
+    .chk{min-height:30px}
+    .chk input{width:18px;height:18px}
+    input[type=range]{height:30px}
+    input[type=range]::-webkit-slider-runnable-track{height:2px}
+    input[type=range]::-webkit-slider-thumb{width:17px;height:24px;margin-top:-11px;border-radius:4px}
+    input[type=range]::-moz-range-thumb{width:17px;height:24px;border-radius:4px}
+    #modal .box{width:94vw;padding:14px;font-size:12px}
   }
   #modal{position:fixed;inset:0;background:rgba(5,3,6,.86);display:none;align-items:center;justify-content:center;z-index:40}
   #modal.on{display:flex}
@@ -115,6 +158,17 @@
   <div class="acts"><button class="mini" id="mSave" style="display:none">Save again</button><button class="mini" id="mClose">Close</button></div>
 </div></div>
 
+<div id="cam">
+  <video id="camVid" autoplay playsinline muted></video>
+  <div id="camErr"></div>
+  <div id="camBar">
+    <button class="mini" id="camFlip">Flip</button>
+    <button id="camShut" title="Capture"></button>
+    <button class="mini" id="camCancel">Cancel</button>
+  </div>
+</div>
+<button id="editPill">EDIT POSTER</button>
+
 <input type="file" id="fImg" accept="image/*" hidden>
 
 <script src="assets/mp4-muxer.min.js"></script>
@@ -122,10 +176,11 @@
 "use strict";
 /* =====================================================================
    JUST RUN / JUST RAN — locked motion-poster builder
-   Locked: typeface (Futura Std Extra Bold Condensed, 140px), leading,
-   alignment, tagline + logo animations and their placement, timing,
-   palettes, glow, grain, vignette.
-   Editable: background image + its heat mapping, headline copy, size.
+   Locked: typeface (Futura Std Extra Bold Condensed), leading, alignment,
+   tagline + logo animations and their placement, timing, palettes, grain.
+   Editable: background photo (upload, drop or camera) + its heat mapping
+   (thermal-camera style: skin maps to skin temperature, not brightness),
+   headline copy, size.
    ===================================================================== */
 
 const CLIPS = { logo:"assets/logo.mp4", vline:"assets/vline.mp4", hline:"assets/hline.mp4" };
@@ -152,13 +207,15 @@ const LAYOUT = {
       sample:"runner",
       copy:"THE CITY'S\nBEEN STEAMING\nSINCE 1882.\nYOUR TURN." },
 };
-/* id, label, layout family, W, H, element scale k (vertical family only) */
+/* id, label, layout family, W, H, lockup scale k */
 const FORMATS = [
   ["h",  "1920 × 1080 · 16:9","h",1920,1080,1],
-  ["v",  "1080 × 1920 · 9:16",  "v",1080,1920,1],
-  ["p34","1080 × 1440 · 3:4",            "v",1080,1440,1],
-  ["p45","1080 × 1350 · 4:5",            "v",1080,1350,.94],
-  ["sq", "1080 × 1080 · 1:1",            "v",1080,1080,.84],
+  ["h43","1440 × 1080 · 4:3", "h",1440,1080,.9],
+  ["h54","1350 × 1080 · 5:4", "h",1350,1080,.88],
+  ["v",  "1080 × 1920 · 9:16","v",1080,1920,1],
+  ["p34","1080 × 1440 · 3:4", "v",1080,1440,1],
+  ["p45","1080 × 1350 · 4:5", "v",1080,1350,.94],
+  ["sq", "1080 × 1080 · 1:1", "v",1080,1080,.84],
 ];
 
 const PAL = {
@@ -169,7 +226,7 @@ const PAL = {
 
 const FPS=30, DUR=6, FRAMES=180;
 const LOCKDEF={tagStyle:"auto", tagSize:1, logoSize:1};
-const IMGDEF={zoom:1, ix:0, iy:0, soft:.25, lo:0, hi:1, gamma:1, invert:false};
+const IMGDEF={zoom:1, ix:0, iy:0, soft:.25, skin:.9, skinTemp:.82, lo:0, hi:1, gamma:1, invert:false};
 const P = { fmt:"h", preview:"auto", copy:{h:LAYOUT.h.copy, v:LAYOUT.v.copy}, sample:"bedroom", ...LOCKDEF, ...IMGDEF };
 const FMT=()=>FORMATS.find(f=>f[0]===P.fmt);
 const orient=()=>FMT()[2];
@@ -182,12 +239,16 @@ const EXT={hline:[392,687], vline:[244,833], logo:[118,975]};
 function L(){
   const [,,fam,W,H,k]=FMT(), base=LAYOUT[fam];
   const asset = P.tagStyle==="auto" ? (fam==="h"?"hline":"vline") : P.tagStyle;
-  const tagS = (fam==="h" ? (asset==="hline"?.30:.25) : .25*k) * P.tagSize;
-  const logoS= (fam==="h" ? .20 : .15*k) * P.logoSize;
+  const tagS = (fam==="h" ? (asset==="hline"?.30:.25)*k : .25*k) * P.tagSize;
+  const logoS= (fam==="h" ? .20*k : .15*k) * P.logoSize;
   const tagTop = fam==="h" ? 50 : 75*k, logoBot = fam==="h" ? 1059 : H-63*k;
   const [t0,t1]=EXT[asset], [l0,l1]=EXT.logo;
   const tagBottom=tagTop+tagS*(t1-t0), logoTop=logoBot-logoS*(l1-l0), pad=25*k;
-  const text = fam==="h" ? {...base.text} : {align:"center", x:540, size:150*k, lead:129*k, track:-30, maxW:1040};
+  /* narrower horizontals keep the 16:9 margins; type scales to the shorter
+     measure so the reference line breaks still fit */
+  const kt=(W-214)/1706;
+  const text = fam==="h" ? {...base.text, size:150*kt, lead:129*kt, maxW:W-214}
+                         : {align:"center", x:540, size:150*k, lead:129*k, track:-30, maxW:1040};
   text.cy=H/2; text.availTop=tagBottom+pad; text.availBot=logoTop-pad; text.maxH=Math.max(60,text.availBot-text.availTop);
   return {...base, W, H,
     logo:{s:logoS, c:[W/2, logoBot-logoS*(l1-540)]},
@@ -323,17 +384,89 @@ function resize(forExport){
   cv.width=RW; cv.height=RH; gl.viewport(0,0,RW,RH);
 }
 function buildBg(){
-  const c=document.createElement("canvas"); c.width=RW; c.height=RH; const x=c.getContext("2d");
+  const c=document.createElement("canvas"); c.width=RW; c.height=RH; const x=c.getContext("2d",{willReadFrequently:true});
   x.fillStyle="#000"; x.fillRect(0,0,RW,RH);
   if(bgImage){
     const iw=bgImage.width, ih=bgImage.height, s=Math.max(RW/iw,RH/ih)*P.zoom;
     const dw=iw*s, dh=ih*s, dx=(RW-dw)/2+P.ix*RW*.5, dy=(RH-dh)/2+P.iy*RH*.5;
     const blurPx=P.soft*Math.sqrt(RW*RH)*.012;
-    if("filter" in x){ x.filter=`grayscale(1) blur(${blurPx.toFixed(2)}px)`; x.drawImage(bgImage,dx,dy,dw,dh); x.filter="none"; }
+    if("filter" in x){ x.filter=`blur(${blurPx.toFixed(2)}px)`; x.drawImage(bgImage,dx,dy,dw,dh); x.filter="none"; }
     else{ const k=1+P.soft*6, t=document.createElement("canvas"); t.width=Math.ceil(RW/k); t.height=Math.ceil(RH/k);
       t.getContext("2d").drawImage(bgImage,dx/k,dy/k,dw/k,dh/k); x.imageSmoothingQuality="high"; x.drawImage(t,0,0,RW,RH); }
+    thermalize(x);
   }
   upload(0,TX.bg,c);
+}
+/* Photo → temperature map.
+   Plain luminance treats a camera's brightness as heat, which makes light
+   skin read hotter than dark skin at the same temperature. A real thermal
+   camera doesn't care about albedo, so skin is found by its chromaticity
+   (Cb/Cr — nearly identical across all skin tones) and pulled toward one
+   skin temperature. Each face keeps its own shading because pixels are
+   offset from the image's mean skin brightness, not replaced by a flat
+   value. Everything that isn't skin keeps the original luminance mapping,
+   so earlier posters read the same. Greyscale sources (the samples, any
+   pre-made heat map) have no chroma, so they pass through untouched. */
+function thermalize(x){
+  const id=x.getImageData(0,0,RW,RH), d=id.data, n=RW*RH;
+  const str=clamp(P.skin);
+  const Y=new Float32Array(n), Wt=new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const r=d[i*4], g=d[i*4+1], b=d[i*4+2];
+    const y=(.299*r+.587*g+.114*b)/255;
+    Y[i]=y;
+    if(str>0){
+      const cb=128-.168736*r-.331264*g+.5*b;
+      const cr=128+.5*r-.418688*g-.081312*b;
+      const db=(cb-103)/17, dr=(cr-153)/13;
+      /* floor keeps neutral/greyscale pixels at exactly zero, so pre-made
+         heat-map images and non-skin areas render as before */
+      let w=Math.min(1, Math.max(0, (Math.exp(-.5*(db*db+dr*dr))*1.8-.12)/.88));
+      w*=y<.02?0 : y<.08?(y-.02)/.06 : 1;   // ignore near-black noise
+      Wt[i]=w;
+    }
+  }
+  if(str>0){
+    /* low-pass of luminance (1/8 res), so each face keeps its local shading
+       while its overall brightness — the albedo — is discarded */
+    const sw=Math.max(1,RW>>3), sh=Math.max(1,RH>>3), lo=new Float32Array(sw*sh);
+    for(let sy=0;sy<sh;sy++) for(let sx=0;sx<sw;sx++){
+      let acc=0,cnt=0;
+      const y0=sy*8, x0=sx*8;
+      for(let dy=0;dy<8;dy+=2) for(let dx=0;dx<8;dx+=2){
+        const yy=Math.min(RH-1,y0+dy), xx=Math.min(RW-1,x0+dx);
+        acc+=Y[yy*RW+xx]; cnt++;
+      }
+      lo[sy*sw+sx]=acc/cnt;
+    }
+    const tmp=new Float32Array(sw*sh);
+    for(let pass=0;pass<2;pass++){
+      const rrad=3, inv=1/(2*rrad+1);
+      for(let yy2=0;yy2<sh;yy2++){ let acc=0;
+        for(let k=-rrad;k<=rrad;k++) acc+=lo[yy2*sw+Math.min(sw-1,Math.max(0,k))];
+        for(let xx2=0;xx2<sw;xx2++){ tmp[yy2*sw+xx2]=acc*inv;
+          acc+=lo[yy2*sw+Math.min(sw-1,xx2+rrad+1)]-lo[yy2*sw+Math.max(0,xx2-rrad)]; } }
+      for(let xx2=0;xx2<sw;xx2++){ let acc=0;
+        for(let k=-rrad;k<=rrad;k++) acc+=tmp[Math.min(sh-1,Math.max(0,k))*sw+xx2];
+        for(let yy2=0;yy2<sh;yy2++){ lo[yy2*sw+xx2]=acc*inv;
+          acc+=tmp[Math.min(sh-1,yy2+rrad+1)*sw+xx2]-tmp[Math.max(0,yy2-rrad)*sw+xx2]; } }
+    }
+    for(let i=0;i<n;i++){
+      const w=Wt[i]*str;
+      let v=Y[i];
+      if(w>.01){
+        const low=lo[Math.min(sh-1,(i/RW|0)>>3)*sw+Math.min(sw-1,(i%RW)>>3)];
+        const skinT=clamp(P.skinTemp+(Y[i]-low)*1.1, .3, 1);
+        v=v*(1-w)+skinT*w;
+      }
+      Y[i]=v;
+    }
+  }
+  for(let i=0;i<n;i++){
+    const o=Math.round(clamp(Y[i])*255);
+    d[i*4]=o; d[i*4+1]=o; d[i*4+2]=o; d[i*4+3]=255;
+  }
+  x.putImageData(id,0,0);
 }
 function buildMasks(){
   const lay=L(), sc=RW/lay.W;                 // base-layout px → render px
@@ -457,7 +590,9 @@ async function rebuild(what="all"){
 let mt=0; const masksSoon=()=>{ clearTimeout(mt); mt=setTimeout(()=>rebuild("masks"),60); };
 let bt=0; const bgSoon=()=>{ clearTimeout(bt); bt=setTimeout(()=>rebuild("bg"),40); };
 function layoutStage(){
-  document.body.classList.toggle("wide", innerWidth>900 && !document.getElementById("panel").classList.contains("hidden"));
+  const hidden=document.getElementById("panel").classList.contains("hidden");
+  document.body.classList.toggle("nopanel", hidden);
+  document.body.classList.toggle("wide", innerWidth>900 && !hidden);
   const o=OUT(); document.getElementById("fmtTag").textContent=`${o.W}×${o.H}${RS<1?` · PREVIEW ${Math.round(RS*100)}%`:""}`;
   const st=document.getElementById("stage"), cs=getComputedStyle(st);
   const aw=st.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight), ah=st.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
@@ -524,9 +659,11 @@ async function exportMP4(){
       await enc.flush(); if(err) throw err; enc.close(); muxer.finalize();
       blob=new Blob([target.buffer],{type:"video/mp4"});
     } else {
-      ext="webm"; mMsg.textContent="This browser can’t encode MP4 — recording WebM in real time…";
-      const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
+      const mime=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"]
+        .find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
       if(!mime) throw new Error("No video encoder available in this browser.");
+      ext=mime.indexOf("mp4")>=0?"mp4":"webm";
+      mMsg.textContent="Recording in real time…";
       const rec=new MediaRecorder(cv.captureStream(FPS),{mimeType:mime,videoBitsPerSecond:bitrate}); const chunks=[];
       rec.ondataavailable=e=>e.data.size&&chunks.push(e.data); const done=new Promise(r=>rec.onstop=r);
       const vs=activeVids(); await Promise.all(vs.map(v=>seek(v,0))); rec.start(); vs.forEach(v=>v.play());
@@ -565,6 +702,9 @@ function slider(f,label,key,min,max,step,on){
 function select(f,label,get,opts,on){ const s=el("select"); opts.forEach(([v,t])=>s.append(el("option",{value:v,textContent:t})));
   s.onchange=()=>on(s.value); ui.ctrls.push(()=>{ s.value=get(); }); row(f,label,s); return s; }
 function buildUI(){
+  panel.append(el("div",{className:"phead"},
+    el("b",{textContent:"JUST RAN · POSTER BUILDER"}),
+    el("button",{textContent:"✕",title:"Hide panel",onclick:()=>{ panel.classList.add("hidden"); layoutStage(); }})));
   const top=el("div"); top.append(el("button",{className:"topbtn",textContent:"Render MP4",onclick:exportMP4}));
   top.append(el("div",{className:"btnrow"},el("button",{className:"topbtn sec",textContent:"Save frame PNG",onclick:exportPNG})));
   panel.append(top);
@@ -591,11 +731,15 @@ function buildUI(){
 
   f=folder("Image");
   select(f,"Source",()=>P.sample,[...Object.entries(SAMPLES).map(([k,v])=>[k,v.label]),["__upload","UPLOADED IMAGE"]],v=>{ if(v==="__upload") document.getElementById("fImg").click(); else setSample(v); });
-  row(f,"Upload",el("div",{className:"ctl"},el("button",{className:"mini",textContent:"Choose image…",onclick:()=>document.getElementById("fImg").click()})));
+  row(f,"Photo",el("div",{className:"ctl"},
+    el("button",{className:"mini",textContent:"Upload…",onclick:()=>document.getElementById("fImg").click()}),
+    el("button",{className:"mini",textContent:"Camera…",onclick:openCamera})));
   slider(f,"Zoom","zoom",1,3,.01,bgSoon);
   slider(f,"Pan X","ix",-1,1,.01,bgSoon);
   slider(f,"Pan Y","iy",-1,1,.01,bgSoon);
   slider(f,"Softness","soft",0,1,.01,bgSoon);
+  slider(f,"Skin heat","skin",0,1,.01,bgSoon);
+  slider(f,"Skin temp","skinTemp",.5,1,.01,bgSoon);
   slider(f,"Heat low","lo",0,.95,.01);
   slider(f,"Heat high","hi",.05,1,.01);
   slider(f,"Heat curve","gamma",.3,3,.01);
@@ -614,6 +758,45 @@ async function switchFormat(fmt){
   ui.refresh(); await rebuild("all"); syncVideos();
 }
 
+/* ------------------------------ camera ---------------------------- */
+const camEl=document.getElementById("cam"), camVid=document.getElementById("camVid"), camErr=document.getElementById("camErr");
+let camStream=null, camFacing="user", camResume=false;
+async function startCam(){
+  stopCam(); camErr.style.display="none";
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error("unsupported");
+    try{
+      camStream=await navigator.mediaDevices.getUserMedia({audio:false,
+        video:{facingMode:camFacing,width:{ideal:2560},height:{ideal:1440}}});
+    }catch(e1){ camStream=await navigator.mediaDevices.getUserMedia({audio:false,video:true}); }
+    camVid.srcObject=camStream;
+    camVid.classList.toggle("mirror",camFacing==="user");
+    await camVid.play().catch(()=>{});
+  }catch(e){
+    camErr.textContent =
+      (location.protocol!=="https:"&&location.hostname!=="localhost") ? "THE CAMERA NEEDS HTTPS — OPEN THE HOSTED VERSION OF THIS TOOL." :
+      (e&&(e.name==="NotAllowedError"||e.name==="SecurityError")) ? "CAMERA PERMISSION WAS DECLINED — ALLOW IT IN YOUR BROWSER, THEN TRY AGAIN." :
+      "NO CAMERA IS AVAILABLE ON THIS DEVICE.";
+    camErr.style.display="block";
+  }
+}
+function stopCam(){ if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; } camVid.srcObject=null; }
+function openCamera(){ camResume=playing; if(playing) setPlaying(false); camEl.classList.add("on"); startCam(); }
+function closeCamera(){ stopCam(); camEl.classList.remove("on"); if(camResume) setPlaying(true); }
+document.getElementById("camFlip").onclick=()=>{ camFacing=camFacing==="user"?"environment":"user"; startCam(); };
+document.getElementById("camCancel").onclick=closeCamera;
+document.getElementById("camShut").onclick=async()=>{
+  if(!camStream||!camVid.videoWidth){ closeCamera(); return; }
+  const c=document.createElement("canvas"); c.width=camVid.videoWidth; c.height=camVid.videoHeight;
+  const g=c.getContext("2d");
+  if(camFacing==="user"){ g.translate(c.width,0); g.scale(-1,1); }   // match the mirrored preview
+  g.drawImage(camVid,0,0);
+  const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.95));
+  closeCamera();
+  if(blob) setBgFile(new File([blob],"camera.jpg",{type:"image/jpeg"}));
+};
+
+document.getElementById("editPill").onclick=()=>{ panel.classList.remove("hidden"); layoutStage(); };
 document.getElementById("fImg").onchange=e=>setBgFile(e.target.files[0]);
 const drop=document.getElementById("drop"); let dragN=0;
 addEventListener("dragenter",e=>{ e.preventDefault(); dragN++; drop.classList.add("on"); });
@@ -642,7 +825,7 @@ addEventListener("keydown",e=>{
   if(location.hash==="#paused") setPlaying(false); else setPlaying(true);
   requestAnimationFrame(loop);
 })();
-window.__poster={P,draw,rebuild,state,VID,seek,activeVids,setT:async t=>{ T=t; if(playing) setPlaying(false); await Promise.all(activeVids().map(v=>seek(v,t))); },switchFormat};
+window.__poster={P,draw,rebuild,state,VID,seek,activeVids,setBgFile,setT:async t=>{ T=t; if(playing) setPlaying(false); await Promise.all(activeVids().map(v=>seek(v,t))); },switchFormat};
 </script>
 </body>
 </html>
